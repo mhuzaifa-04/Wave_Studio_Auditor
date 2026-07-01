@@ -1,0 +1,751 @@
+/* Premium Studio Light Mode Design Tokens */
+:root {
+    --bg-main: #f1f5f9;         /* Soft slate light backdrop */
+    --bg-card: #ffffff;         /* Crisp white core element panels */
+    --bg-workspace: #f8fafc;    /* Clean porcelain contrast for audio wave paths */
+    --border-color: #cbd5e1;    /* Light grey border dividing lines */
+    --accent-blue: #0284c7;     /* High-contrast rich sky blue */
+    --accent-glow: rgba(2, 132, 199, 0.12);
+    --accent-emerald: #059669;  /* Strong contrast forest green for download metrics */
+    --text-primary: #0f172a;    /* Deep navy slate for elegant high-readability text */
+    --text-muted: #64748b;      /* Cool charcoal grey for minor tag labels */
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-main);
+    background-image: radial-gradient(circle at 50% 15%, #ffffff 0%, var(--bg-main) 70%);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Application Wrapper Card Frame with Soft Floating Shadows */
+    .editor-container {
+        background-color: var(--bg-card);
+        border: 1px solid rgba(203, 213, 225, 0.6);
+        padding: 35px;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        width: 92%;
+        max-width: 850px;
+    }
+
+/* Header UI text configurations */
+.app-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.app-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+}
+
+.app-header h1 .badge {
+    background: linear-gradient(135deg, var(--accent-blue), #0369a1);
+    color: #ffffff;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.app-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Interactive File Upload Drop-Zone Component */
+.upload-section {
+    position: relative;
+    border: 2px dashed var(--border-color);
+    background-color: rgba(248, 250, 252, 0.6);
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.upload-section:hover {
+    border-color: var(--accent-blue);
+    background-color: rgba(2, 132, 199, 0.01);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.upload-section input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+}
+
+.upload-icon {
+    width: 42px;
+    height: 42px;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+    transition: color 0.2s;
+}
+
+.upload-section:hover .upload-icon {
+    color: var(--accent-blue);
+}
+
+.upload-btn-proxy {
+    background-color: #e2e8f0;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Audio Waveform Canvas Display Framework */
+#waveform-workspace {
+    background-color: var(--bg-workspace);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 25px;
+    padding: 15px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* High-Precision Real-Time Meta Information Grid Badge */
+.trim-indicator {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1.2fr;
+    align-items: center;
+    background-color: rgba(241, 245, 249, 0.8);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.trim-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.meta-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.meta-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.trim-meta.highlight .meta-value {
+    color: var(--accent-blue);
+}
+
+.trim-divider {
+    width: 1px;
+    height: 25px;
+    background-color: var(--border-color);
+}
+
+/* Controls Interface Block Grid Setup */
+#controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background-color: #f8fafc;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.playback-controls, .processing-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.ticker-font {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Micro-Interaction Actions Setup */
+.control-btn {
+    border: 1px solid transparent;
+    padding: 10px 22px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+.play-btn {
+    background-color: var(--text-primary);
+    color: var(--bg-card);
+}
+
+.play-btn:hover {
+    background-color: #1e293b;
+    transform: translateY(-1px);
+}
+
+.preview-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.preview-btn:hover {
+    background-color: #f1f5f9;
+    color: var(--text-primary);
+    border-color: var(--text-muted);
+}
+
+.download-style {
+    background-color: var(--accent-emerald);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.download-style:hover {
+    background-color: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+}
+
+.control-btn:active {
+    transform: translateY(1px);
+}
+
+/* Custom Input Field Metrics */
+.speed-control-group, .format-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.speed-control-group label, .format-control-group label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.slider-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#speed-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 130px;
+    background: transparent;
+    cursor: pointer;
+}
+
+#speed-slider:focus {
+    outline: none;
+}
+
+#speed-slider::-webkit-slider-runnable-track {
+    background: #e2e8f0;
+    height: 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+#speed-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -5px;
+    background-color: var(--bg-card);
+    border: 2px solid var(--accent-blue);
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.1s, background-color 0.1s;
+}
+
+#speed-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background-color: var(--accent-blue);
+}
+
+.custom-input-container {
+    display: flex;
+    align-items: center;
+    background-color: #f1f5f9;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 4px 10px;
+    transition: all 0.2s ease;
+}
+
+.custom-input-container:focus-within {
+    border-color: var(--accent-blue);
+    background-color: #ffffff;
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.speed-input-field {
+    background: transparent;
+    border: none;
+    color: var(--accent-blue);
+    font-weight: 700;
+    font-size: 0.95rem;
+    width: 45px;
+    text-align: right;
+    outline: none;
+}
+
+.input-suffix {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-left: 2px;
+}
+
+.speed-input-field::-webkit-outer-spin-button,
+.speed-input-field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.premium-dropdown {
+    background-color: #f1f5f9;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.premium-dropdown:focus {
+    border-color: var(--accent-blue);
+    background-color: #ffffff;
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ========================================================
+   LIGHT GLASS CINEMATIC OVERLAY LOADER MODAL
+   ======================================================== */
+.status-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 0.82); /* Semi-transparent snowy crystal filter */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    z-index: 9999;
+    color: var(--accent-blue);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-box.success {
+    color: var(--accent-emerald);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    box-shadow: 0 0 20px rgba(2, 132, 199, 0.08);
+}
+
+.status-box.success .loading-spinner {
+    display: none;
+}
+
+#status-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: center;
+    max-width: 75%;
+    margin: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom Seeker Input Adjuster */
+.position-input-field {
+    width: 55px !important; /* Slightly wider to accommodate longer tracks gracefully */
+}
+.time-seek-group {
+    margin-left: 5px;
+}
+
+
+/* ==========================================
+   TIMECODE DUAL-INPUT GRID ARCHITECTURE
+   ========================================== */
+.timecode-wrapper {
+    padding: 6px 10px;
+    gap: 2px;
+}
+
+.timecode-field {
+    background: transparent;
+    border: none;
+    color: var(--accent-blue);
+    font-weight: 700;
+    font-size: 0.95rem;
+    width: 25px; /* Perfect tight width for exactly two numbers */
+    text-align: center;
+    outline: none;
+    font-family: inherit;
+}
+
+/* Remove up/down layout arrows across browsers */
+.timecode-field::-webkit-outer-spin-button,
+.timecode-field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.timecode-field {
+    -moz-appearance: textfield; /* Firefox compatibility */
+}
+
+.timecode-separator {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.95rem;
+    user-select: none;
+}
+
+/* ==========================================
+   TIMELINE SCRUBBER POINTER STYLES
+   ========================================== */
+.scrubber-timeline-container {
+    margin-top: 10px;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-pointer-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: #e2e8f0;      /* Matches the wave track background grid */
+    height: 6px;
+    border-radius: 3px;
+    cursor: grab;
+    outline: none;
+}
+
+.timeline-pointer-slider:active {
+    cursor: grabbing;
+}
+
+/* Style the Pointer Drag Handle (Moves the Red Stick) */
+.timeline-pointer-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #ef4444; /* Matches the vibrant red playhead color exactly */
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+    transition: transform 0.1s ease;
+}
+
+.timeline-pointer-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+}
+
+/* ==========================================
+   HIGH-PRECISION TRIM INPUT ADJUSTMENTS
+   ========================================== */
+.trim-input-border {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(203, 213, 225, 0.8) !important;
+    margin-top: 4px;
+    width: fit-content;
+}
+.trim-meta {
+    align-items: flex-start;
+}
+.text-align-center-val {
+    margin-top: 8px;
+    display: inline-block;
+}
+
+/* ==========================================
+   UPPER TRIMMING SLIDERS GRID ENVIRONMENT
+   ========================================== */
+.trim-sliders-wrapper {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.trim-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    min-width: 85px;
+}
+
+/* Precise Small Navigation Buttons for Trim adjustment */
+.trim-skip-btn {
+    background-color: #f1f5f9;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 6px 10px !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 6px;
+}
+
+.trim-skip-btn:hover {
+    background-color: #ffffff;
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+/* Custom handle coloration for the Start selection slider */
+.trim-accent-start::-webkit-slider-thumb {
+    background-color: var(--accent-blue) !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3) !important;
+}
+
+/* Custom handle coloration for the End selection slider */
+.trim-accent-end::-webkit-slider-thumb {
+    background-color: #475569 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* ==========================================
+   DEVELOPER PROFILE FOOTER VISUALS
+   ========================================== */
+.app-footer-profile {
+    margin-top: 30px;
+}
+
+.footer-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border-color), transparent);
+    margin-bottom: 25px;
+}
+
+.profile-layout-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 0 5px;
+}
+
+/* Developer Logo Node Box */
+.profile-avatar-node {
+    background-color: var(--bg-workspace);
+    border: 1px solid var(--border-color);
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--accent-blue);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.dev-avatar-icon {
+    width: 22px;
+    height: 22px;
+}
+
+/* Typography Identity Alignments */
+.profile-bio-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dev-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.dev-bio {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.4;
+    max-width: 520px;
+}
+
+/* Premium Interactive GitHub Button Action */
+.github-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--text-primary); /* Matches the primary dark navy slate theme button style */
+    color: var(--bg-card);
+    text-decoration: none;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.08);
+}
+
+.github-cta-btn:hover {
+    background-color: var(--accent-blue);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px var(--accent-glow);
+}
+
+.github-cta-btn:active {
+    transform: translateY(1px);
+}
+
+.github-btn-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.linkedin-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--text-primary); /* Matches the primary dark navy slate theme button style */
+    color: var(--bg-card);
+    text-decoration: none;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.08);
+}
+
+.linkedin-cta-btn:hover {
+    background-color: var(--accent-blue);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px var(--accent-glow);
+}
+
+.linkedin-cta-btn:active {
+    transform: translateY(1px);
+}
+
+.linkedin-btn-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Responsive collapse rule layout tweak for smaller monitor sizes */
+@media (max-width: 680px) {
+    .profile-layout-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+        justify-items: center;
+        gap: 15px;
+    }
+    .dev-bio {
+        max-width: 100%;
+    }
+}
+
+/* ==========================================
+   AMBIENT 3D BACKGROUND MATRIX ENVIRONMENT
+   ========================================== */
+#bg-3d-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;          /* Locks canvas directly behind everything else */
+    pointer-events: none; /* Allows mouse clicks to pass right through to inputs */
+    background-color: #ffffff; /* Ground floor canvas studio backdrop */
+}
+
+/* Upgrading the main editor container to float with high-end glass style depth over the 3D mesh */
+.editor-container {
+    background-color: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 0, 0, 0.6) !important;
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}

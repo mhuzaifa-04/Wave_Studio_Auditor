@@ -62,19 +62,19 @@ const waveformZoomSlider = document.getElementById('waveform-zoom-slider');
 // Grab Trim Readout UI Badges
 const trimBadge = document.getElementById('trim-badge');
 const trimDurationTxt = document.getElementById('trim-duration-txt');
-const trimStartMin = document.getElementById('trim-start-min'); 
-const trimStartSec = document.getElementById('trim-start-sec'); 
-const trimEndMin = document.getElementById('trim-end-min');     
-const trimEndSec = document.getElementById('trim-end-sec');     
+const trimStartMin = document.getElementById('trim-start-min');
+const trimStartSec = document.getElementById('trim-start-sec');
+const trimEndMin = document.getElementById('trim-end-min');
+const trimEndSec = document.getElementById('trim-end-sec');
 
 // State Variables
 let currentSpeed = 1.0;
-let trimStart = 0; 
-let trimEnd = 0;   
+let trimStart = 0;
+let trimEnd = 0;
 let rawFileReference = null;
 let isPreviewModeActive = false;
-let isProgrammaticUpdate = false; 
-let trimZoneRegion = null; 
+let isProgrammaticUpdate = false;
+let trimZoneRegion = null;
 
 // Time code formatting helper
 const formatTime = (seconds) => {
@@ -128,9 +128,9 @@ const updateTrimUIReadout = (start, end) => {
     const scaledDuration = (end - start) / currentSpeed;
 
     const userIsCurrentlyTyping = [
-        trimStartMin, 
-        trimStartSec, 
-        trimEndMin, 
+        trimStartMin,
+        trimStartSec,
+        trimEndMin,
         trimEndSec
     ].includes(document.activeElement);
 
@@ -140,7 +140,7 @@ const updateTrimUIReadout = (start, end) => {
         trimEndMin.value = Math.floor(scaledEnd / 60).toString().padStart(2, '0');
         trimEndSec.value = Math.floor(scaledEnd % 60).toString().padStart(2, '0');
     }
-    
+
     trimDurationTxt.textContent = `${scaledDuration.toFixed(1)}s`;
 
     trimStartSlider.value = start;
@@ -158,9 +158,9 @@ wavesurfer.on('ready', function () {
     // CRITICAL FIX: DYNAMIC ZOOM CEILING CALCULATION
     // Keeps total canvas width strictly under 30,000px to guarantee the browser never crashes/resets
     const safeMaxZoomPxPerSec = Math.floor(30000 / duration);
-    
+
     waveformZoomSlider.min = "0";
-    waveformZoomSlider.max = Math.max(5, safeMaxZoomPxPerSec).toString(); 
+    waveformZoomSlider.max = Math.max(5, safeMaxZoomPxPerSec).toString();
     waveformZoomSlider.value = "0";
     wavesurfer.zoom(0);
 
@@ -189,7 +189,7 @@ wsRegions.on('region-updated', function (region) {
     if (region.id === 'trim-zone') {
         trimStart = region.start;
         trimEnd = region.end;
-        
+
         if (!isProgrammaticUpdate) {
             updateTrimUIReadout(trimStart, trimEnd);
         }
@@ -200,7 +200,7 @@ wsRegions.on('region-updated', function (region) {
 // ========================================================
 // CORE IMPLEMENTATION: HIGH-RESOLUTION ZOOM ENGAGEMENT
 // ========================================================
-waveformZoomSlider.addEventListener('input', function(event) {
+waveformZoomSlider.addEventListener('input', function (event) {
     const zoomPixelsPerSecond = Number(event.target.value);
     wavesurfer.zoom(zoomPixelsPerSecond);
 });
@@ -274,7 +274,7 @@ trimEndSec.addEventListener('blur', cleanTrimPaddingOnBlur);
 
 
 // Drag Handle 1: Moving the Selection START slider stick
-trimStartSlider.addEventListener('input', function(event) {
+trimStartSlider.addEventListener('input', function (event) {
     let value = parseFloat(event.target.value);
     if (value >= trimEnd) {
         value = Math.max(0, trimEnd - 0.5);
@@ -285,7 +285,7 @@ trimStartSlider.addEventListener('input', function(event) {
 });
 
 // Drag Handle 2: Moving the Selection END slider stick
-trimEndSlider.addEventListener('input', function(event) {
+trimEndSlider.addEventListener('input', function (event) {
     let value = parseFloat(event.target.value);
     if (value <= trimStart) {
         value = Math.min(wavesurfer.getDuration(), trimStart + 0.5);
@@ -299,22 +299,22 @@ trimEndSlider.addEventListener('input', function(event) {
 // ========================================================
 // UPPER 5s FINE-TUNERS NUDGE LISTENERS
 // ========================================================
-btnTstartBack.addEventListener('click', function() {
+btnTstartBack.addEventListener('click', function () {
     trimStart = Math.max(0, trimStart - 5);
     applyUpperSliderTrimChanges();
 });
 
-btnTstartForward.addEventListener('click', function() {
+btnTstartForward.addEventListener('click', function () {
     trimStart = Math.min(trimEnd - 0.5, trimStart + 5);
     applyUpperSliderTrimChanges();
 });
 
-btnTendBack.addEventListener('click', function() {
+btnTendBack.addEventListener('click', function () {
     trimEnd = Math.max(trimStart + 0.5, trimEnd - 5);
     applyUpperSliderTrimChanges();
 });
 
-btnTendForward.addEventListener('click', function() {
+btnTendForward.addEventListener('click', function () {
     const duration = wavesurfer.getDuration();
     trimEnd = Math.min(duration, trimEnd + 5);
     applyUpperSliderTrimChanges();
@@ -480,7 +480,7 @@ downloadBtn.addEventListener('click', async function () {
             fileSystemSaveHandle = await window.showSaveFilePicker(pickerOptions);
         } catch (pickerError) {
             console.log("User cancelled file location selection window:", pickerError);
-            return; 
+            return;
         }
     }
 
@@ -564,7 +564,7 @@ const init3DBackgroundMatrix = () => {
     const numCols = 32;
     const numRows = 24;
     const spacing = 45; // Separation space between intersection nodes
-    
+
     // 3D Perspective Metrics
     const fov = 380;    // Focal length/camera magnification strength
     const viewingAngleX = 0.55; // Tilted downward angle vector pitch
@@ -602,7 +602,7 @@ const init3DBackgroundMatrix = () => {
                 // 3. Rotate coordinates on X-axis to create the angled perspective plane layout
                 const cosX = Math.cos(viewingAngleX);
                 const sinX = Math.sin(viewingAngleX);
-                
+
                 const rotY = y3d * cosX - z3d * sinX;
                 const rotZ = y3d * sinX + z3d * cosX;
 
@@ -619,7 +619,7 @@ const init3DBackgroundMatrix = () => {
                     ctx.lineTo(screenX, screenY);
                 }
             }
-            
+
             // Give closer lines more prominence than distant background lines (Atmospheric Depth)
             const depthOpacity = (r / numRows) * 0.15;
             ctx.strokeStyle = `rgba(2, 132, 199, ${depthOpacity})`; // Matches sky blue theme color safely

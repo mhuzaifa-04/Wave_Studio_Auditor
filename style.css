@@ -749,3 +749,40 @@ body {
     box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08), 
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
+
+/* ==========================================
+   WAVEFORM SCROLLING ZOOM UTILITIES
+   ========================================== */
+#waveform-container {
+    overflow-x: auto; /* Triggers the scrollbar when wavesurfer zooms wide */
+    width: 100%;
+    background-color: var(--bg-workspace);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.zoom-control-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+    padding: 0 4px;
+}
+
+.zoom-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.zoom-slider-field {
+    max-width: 160px;
+}
+
+/* Custom green highlight thumb for the magnification slider */
+.zoom-slider-field::-webkit-slider-thumb {
+    background-color: #10b981 !important; /* Premium Emerald green color tint */
+    border-color: #ffffff !important;
+}

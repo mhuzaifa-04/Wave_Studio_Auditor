@@ -56,6 +56,9 @@ const btnTstartForward = document.getElementById('btn-tstart-forward');
 const btnTendBack = document.getElementById('btn-tend-back');
 const btnTendForward = document.getElementById('btn-tend-forward');
 
+// Grab High-Resolution Magnification Slider Track Element
+const waveformZoomSlider = document.getElementById('waveform-zoom-slider');
+
 // Grab Trim Readout UI Badges
 const trimBadge = document.getElementById('trim-badge');
 const trimDurationTxt = document.getElementById('trim-duration-txt');
@@ -71,7 +74,7 @@ let trimEnd = 0;
 let rawFileReference = null;
 let isPreviewModeActive = false;
 let isProgrammaticUpdate = false; 
-let trimZoneRegion = null; // Stably targets the active region object
+let trimZoneRegion = null; 
 
 // Time code formatting helper
 const formatTime = (seconds) => {
@@ -89,8 +92,7 @@ const wavesurfer = WaveSurfer.create({
     cursorColor: '#ef4444',
     barWidth: 2,
     barGap: 1,
-    height: 120,
-    responsive: true
+    height: 120
 });
 
 const wsRegions = wavesurfer.registerPlugin(RegionsPlugin.create());
@@ -102,11 +104,8 @@ fileInput.addEventListener('change', function (event) {
         rawFileReference = file;
         const fileUrl = URL.createObjectURL(file);
 
-        const dummyPeaks = [];
-        for (let i = 0; i < 150; i++) {
-            dummyPeaks.push(Math.sin(i * 0.15) * 0.4 + 0.5);
-        }
-        wavesurfer.load(fileUrl, [dummyPeaks]);
+        // CRITICAL FIX: Removed fixed 150-point dummy array restriction to allow true, native zoom stretch rendering
+        wavesurfer.load(fileUrl);
 
         dropZone.classList.add('hidden');
         controlsSection.classList.remove('hidden');
@@ -117,6 +116,7 @@ fileInput.addEventListener('change', function (event) {
         seekMinInput.value = '00';
         seekSecInput.value = '00';
         timelineScrubber.value = 0;
+        waveformZoomSlider.value = 0; // Reset tracking pointer position
         currentSpeed = 1.0;
     }
 });
@@ -134,7 +134,6 @@ const updateTrimUIReadout = (start, end) => {
         trimEndSec
     ].includes(document.activeElement);
 
-    // Block timeline reads from changing data inside your active typing window
     if (!userIsCurrentlyTyping) {
         trimStartMin.value = Math.floor(scaledStart / 60).toString().padStart(2, '0');
         trimStartSec.value = Math.floor(scaledStart % 60).toString().padStart(2, '0');
@@ -144,7 +143,6 @@ const updateTrimUIReadout = (start, end) => {
     
     trimDurationTxt.textContent = `${scaledDuration.toFixed(1)}s`;
 
-    // Sync positions of upper sliders fluidly
     trimStartSlider.value = start;
     trimEndSlider.value = end;
 };
@@ -157,6 +155,16 @@ wavesurfer.on('ready', function () {
 
     wavesurfer.setPlaybackRate(currentSpeed);
 
+    // CRITICAL FIX: DYNAMIC ZOOM CEILING CALCULATION
+    // Keeps total canvas width strictly under 30,000px to guarantee the browser never crashes/resets
+    const safeMaxZoomPxPerSec = Math.floor(30000 / duration);
+    
+    waveformZoomSlider.min = "0";
+    waveformZoomSlider.max = Math.max(5, safeMaxZoomPxPerSec).toString(); 
+    waveformZoomSlider.value = "0";
+    wavesurfer.zoom(0);
+
+    // Sync sliders max bounds to exact file duration metric
     trimStartSlider.max = duration;
     trimEndSlider.max = duration;
 
@@ -190,7 +198,16 @@ wsRegions.on('region-updated', function (region) {
 
 
 // ========================================================
-// CORE IMPLEMENTATION: MANUAL TYPING & SLIDER ENGINE RESTORED
+// CORE IMPLEMENTATION: HIGH-RESOLUTION ZOOM ENGAGEMENT
+// ========================================================
+waveformZoomSlider.addEventListener('input', function(event) {
+    const zoomPixelsPerSecond = Number(event.target.value);
+    wavesurfer.zoom(zoomPixelsPerSecond);
+});
+
+
+// ========================================================
+// CORE IMPLEMENTATION: MANUAL TYPING & SLIDER ENGINE
 // ========================================================
 
 const applyUpperSliderTrimChanges = () => {
@@ -206,7 +223,6 @@ const applyUpperSliderTrimChanges = () => {
     isProgrammaticUpdate = false;
 };
 
-// NEW & RESTORED: Manual Timecode Typing Input Listener
 const executeManualTrimUpdate = () => {
     const totalDuration = wavesurfer.getDuration();
     if (!trimZoneRegion || totalDuration === 0) return;
@@ -216,11 +232,9 @@ const executeManualTrimUpdate = () => {
     let endMin = parseInt(trimEndMin.value) || 0;
     let endSec = parseInt(trimEndSec.value) || 0;
 
-    // Boundary check seconds
     if (startSec > 59) { startSec = 59; trimStartSec.value = '59'; }
     if (endSec > 59) { endSec = 59; trimEndSec.value = '59'; }
 
-    // Factor in speed settings adjustments
     let scaledStart = (startMin * 60) + startSec;
     let scaledEnd = (endMin * 60) + endSec;
 
@@ -230,7 +244,6 @@ const executeManualTrimUpdate = () => {
     if (rawStart < 0) rawStart = 0;
     if (rawEnd > totalDuration) rawEnd = totalDuration;
 
-    // Push handles if values cross limits mid-typing
     if (rawStart >= rawEnd) {
         if (document.activeElement === trimStartMin || document.activeElement === trimStartSec) {
             rawEnd = Math.min(totalDuration, rawStart + 2);
@@ -245,7 +258,6 @@ const executeManualTrimUpdate = () => {
     applyUpperSliderTrimChanges();
 };
 
-// RE-ATTACHED CRITICAL TEXT FIELD LISTENERS: Fires when hitting Enter or clicking away
 trimStartMin.addEventListener('change', executeManualTrimUpdate);
 trimStartSec.addEventListener('change', executeManualTrimUpdate);
 trimEndMin.addEventListener('change', executeManualTrimUpdate);
@@ -442,9 +454,6 @@ wavesurfer.on('play', () => playBtn.textContent = 'Pause');
 wavesurfer.on('pause', () => playBtn.textContent = 'Play');
 
 // SECURE & OPTIMIZED COMPILATION PIPELINE WITH LOCATION PICKING
-// ========================================================
-// SECURE & PATCHED INPUT-TRIM COMPILATION PIPELINE
-// ========================================================
 downloadBtn.addEventListener('click', async function () {
     if (!rawFileReference) return;
 
@@ -456,7 +465,6 @@ downloadBtn.addEventListener('click', async function () {
     if (selectedFormat === 'wav') mimeType = 'audio/wav';
     if (selectedFormat === 'm4a') mimeType = 'audio/x-m4a';
 
-    // 1. Secure download handle while gesture is fresh
     if ('showSaveFilePicker' in window) {
         try {
             const originalNamePrefix = rawFileReference.name.substring(0, rawFileReference.name.lastIndexOf('.')) || rawFileReference.name;
@@ -495,15 +503,13 @@ downloadBtn.addEventListener('click', async function () {
 
         statusText.textContent = `Compiling! Converting into ${selectedFormat.toUpperCase()} and locking pitch at ${currentSpeed.toFixed(2)}x...`;
 
-        // Calculate the precise amount of RAW input seconds to extract
         const durationOfCut = trimEnd - trimStart;
 
-        // CRITICAL RE-ORDER FIX: -ss and -t are placed BEFORE -i to lock input boundaries
         await ffmpeg.exec([
-            '-ss', trimStart.toFixed(2),      // Seek to original file start point
-            '-t', durationOfCut.toFixed(2),   // Read ONLY the length of the highlighted segment
-            '-i', 'input.mp3',                // Load source asset
-            '-filter:a', `atempo=${currentSpeed.toFixed(2)}`, // Speed up the isolated chunk
+            '-ss', trimStart.toFixed(2),
+            '-t', durationOfCut.toFixed(2),
+            '-i', 'input.mp3',
+            '-filter:a', `atempo=${currentSpeed.toFixed(2)}`,
             outputFilename
         ]);
 

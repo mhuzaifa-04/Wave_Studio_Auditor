@@ -7,10 +7,7 @@
 
     <script src="coi-serviceworker.js"></script>
 
-    
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-
 </head>
 <body>
 
@@ -39,13 +36,13 @@
                 <div class="trim-slider-row">
                     <span class="slider-label">START CUT</span>
                     <button id="btn-tstart-back" class="control-btn trim-skip-btn" title="Nudge Start Back 5s">⟲ 5s</button>
-                    <input type="range" id="trim-start-slider" min="0" max="100" step="0.1" value="0" class="timeline-pointer-slider trim-accent-start">
+                    <input type="range" id="trim-start-slider" min="0" max="100" step="0.001" value="0" class="timeline-pointer-slider trim-accent-start">
                     <button id="btn-tstart-forward" class="control-btn trim-skip-btn" title="Nudge Start Forward 5s">5s ⟳</button>
                 </div>
                 <div class="trim-slider-row">
                     <span class="slider-label">END CUT</span>
                     <button id="btn-tend-back" class="control-btn trim-skip-btn" title="Nudge End Back 5s">⟲ 5s</button>
-                    <input type="range" id="trim-end-slider" min="0" max="100" step="0.1" value="100" class="timeline-pointer-slider trim-accent-end">
+                    <input type="range" id="trim-end-slider" min="0" max="100" step="0.001" value="100" class="timeline-pointer-slider trim-accent-end">
                     <button id="btn-tend-forward" class="control-btn trim-skip-btn" title="Nudge End Forward 5s">5s ⟳</button>
                 </div>
             </div>
@@ -54,11 +51,11 @@
             
             <div class="zoom-control-container">
                 <label for="waveform-zoom-slider" class="zoom-label">🔍 WAVEFORM ZOOM</label>
-                <input type="range" id="waveform-zoom-slider" min="1" max="150" value="1" step="1" class="timeline-pointer-slider zoom-slider-field">
+                <input type="range" id="waveform-zoom-slider" min="0" max="150" value="0" step="1" class="timeline-pointer-slider zoom-slider-field">
             </div>
             
             <div class="scrubber-timeline-container">
-                <input type="range" id="timeline-scrubber" min="0" max="100" step="0.1" value="0" class="timeline-pointer-slider">
+                <input type="range" id="timeline-scrubber" min="0" max="100" step="0.01" value="0" class="timeline-pointer-slider">
             </div>
         </div>
 
@@ -69,6 +66,8 @@
                     <input type="number" id="trim-start-min" min="0" value="00" class="timecode-field" placeholder="00">
                     <span class="timecode-separator">:</span>
                     <input type="number" id="trim-start-sec" min="0" max="59" value="00" class="timecode-field" placeholder="00">
+                    <span class="timecode-separator">.</span>
+                    <input type="number" id="trim-start-ms" min="0" max="999" value="000" class="timecode-field ms-field" placeholder="000">
                 </div>
             </div>
             <div class="trim-divider"></div>
@@ -78,12 +77,14 @@
                     <input type="number" id="trim-end-min" min="0" value="00" class="timecode-field" placeholder="00">
                     <span class="timecode-separator">:</span>
                     <input type="number" id="trim-end-sec" min="0" max="59" value="00" class="timecode-field" placeholder="00">
+                    <span class="timecode-separator">.</span>
+                    <input type="number" id="trim-end-ms" min="0" max="999" value="000" class="timecode-field ms-field" placeholder="000">
                 </div>
             </div>
             <div class="trim-divider"></div>
             <div class="trim-meta highlight">
                 <span class="meta-label">OUTPUT LENGTH</span>
-                <span id="trim-duration-txt" class="meta-value text-align-center-val">0.0s</span>
+                <span id="trim-duration-txt" class="meta-value text-align-center-val">0.000s</span>
             </div>
         </div>
 
@@ -94,13 +95,15 @@
                 <button id="btn-forward-5s" class="control-btn skip-btn" title="Fast Forward 5 Seconds">5s ⟳</button>
                 
                 <button id="btn-preview" class="control-btn preview-btn">Preview Cut</button>
-                <span id="time-display" class="ticker-font">00:00 / 00:00</span>
+                <span id="time-display" class="ticker-font">00:00.000 / 00:00.000</span>
 
                 <div class="time-seek-group">
                     <div class="custom-input-container timecode-wrapper">
                         <input type="number" id="seek-min" min="0" value="00" class="timecode-field" placeholder="00">
                         <span class="timecode-separator">:</span>
                         <input type="number" id="seek-sec" min="0" max="59" value="00" class="timecode-field" placeholder="00">
+                        <span class="timecode-separator">.</span>
+                        <input type="number" id="seek-ms" min="0" max="999" value="000" class="timecode-field ms-field" placeholder="000">
                     </div>
                 </div>
             </div>
@@ -143,13 +146,8 @@
                     <h3 class="dev-name">Mohammad Huzaifa</h3>
                     <p class="dev-bio">Audio tech enthusiast & Frontend Engineer. Built this precision digital audio workstation to process massive recording tracks securely on the client side.</p>
                 </div>
-                    <div class="profile-actions">
-                    <a class="linkedin-cta-btn" href="https://www.linkedin.com/in/mhuzaifa04" target="_blank">
-                        <i class="fa-brands fa-linkedin"></i>
-                        <span>Follow on LinkedIn</span>
-                    </a>
-                    <br>
-                    <br>                    <a href="https://github.com/mhuzaifa-04/Wave_Studio_Auditor" target="_blank" class="github-cta-btn">
+                <div class="profile-actions">
+                    <a href="https://github.com/mhuzaifa-04/Wave_Studio_Auditor" target="_blank" class="github-cta-btn">
                         <svg class="github-btn-icon" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                         </svg>

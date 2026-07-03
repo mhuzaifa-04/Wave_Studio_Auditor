@@ -786,3 +786,17 @@ body {
     background-color: #10b981 !important; /* Premium Emerald green color tint */
     border-color: #ffffff !important;
 }
+
+/* ==========================================
+   HIGH-RESOLUTION MILLISECOND TYPING UI
+   ========================================== */
+.ms-field {
+    width: 42px !important; /* Expansion sizing to hold 3 numbers cleanly */
+    color: var(--accent-blue) !important; /* Emerald/Blue indicator tint */
+    font-weight: 700;
+}
+
+.timecode-wrapper {
+    min-width: 135px; /* Broadened wrapper base layer */
+    justify-content: center;
+}

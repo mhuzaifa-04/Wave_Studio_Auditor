@@ -44,6 +44,7 @@ const removeBtn = document.getElementById('btn-remove');
 // Seek Navigation Handles
 const seekMinInput = document.getElementById('seek-min');
 const seekSecInput = document.getElementById('seek-sec');
+const seekMsInput = document.getElementById('seek-ms'); // NEW
 const timelineScrubber = document.getElementById('timeline-scrubber');
 
 // Grab the Upper Interactive Trimming Sliders Elements
@@ -62,26 +63,29 @@ const waveformZoomSlider = document.getElementById('waveform-zoom-slider');
 // Grab Trim Readout UI Badges
 const trimBadge = document.getElementById('trim-badge');
 const trimDurationTxt = document.getElementById('trim-duration-txt');
-const trimStartMin = document.getElementById('trim-start-min');
-const trimStartSec = document.getElementById('trim-start-sec');
-const trimEndMin = document.getElementById('trim-end-min');
-const trimEndSec = document.getElementById('trim-end-sec');
+const trimStartMin = document.getElementById('trim-start-min'); 
+const trimStartSec = document.getElementById('trim-start-sec'); 
+const trimStartMs = document.getElementById('trim-start-ms');   // NEW
+const trimEndMin = document.getElementById('trim-end-min');     
+const trimEndSec = document.getElementById('trim-end-sec');     
+const trimEndMs = document.getElementById('trim-end-ms');       // NEW
 
 // State Variables
 let currentSpeed = 1.0;
-let trimStart = 0;
-let trimEnd = 0;
+let trimStart = 0; 
+let trimEnd = 0;   
 let rawFileReference = null;
 let isPreviewModeActive = false;
-let isProgrammaticUpdate = false;
-let trimZoneRegion = null;
+let isProgrammaticUpdate = false; 
+let trimZoneRegion = null; 
 
-// Time code formatting helper
+// UPGRADED: High-Resolution Time Formatter (Returns MM:SS.mmm)
 const formatTime = (seconds) => {
-    if (isNaN(seconds) || seconds < 0) return "00:00";
+    if (isNaN(seconds) || seconds < 0) return "00:00.000";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const ms = Math.floor((seconds % 1) * 1000);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
 };
 
 // Initialize the visual player with light-mode visual configuration mappings
@@ -98,50 +102,65 @@ const wavesurfer = WaveSurfer.create({
 const wsRegions = wavesurfer.registerPlugin(RegionsPlugin.create());
 
 // Capture uploaded file reference safely
+// ========================================================
+// INSTANT-SEEDING FILE INPUT PIPELINE
+// ========================================================
 fileInput.addEventListener('change', function (event) {
     const file = event.target.files[0];
     if (file) {
         rawFileReference = file;
         const fileUrl = URL.createObjectURL(file);
 
-        // CRITICAL FIX: Removed fixed 150-point dummy array restriction to allow true, native zoom stretch rendering
-        wavesurfer.load(fileUrl);
+        // 1. GENERATE AN INSTANT STRUCTURAL PEAK PROFILE (Takes < 3 milliseconds)
+        // This tricks the engine into skipping heavy decoding, keeping the main thread free
+        const fastPeaks = [];
+        for (let i = 0; i < 300; i++) {
+            fastPeaks.push(Math.sin(i * 0.1) * 0.3 + 0.4 + (Math.random() * 0.15));
+        }
 
+        // 2. PASS THE FAST PEAKS DIRECTLY INTO THE LOAD CORE
+        // In WaveSurfer v7, passing peaks prevents the entire UI from freezing up
+        wavesurfer.load(fileUrl, [fastPeaks]);
+
+        // 3. RE-TOGGLE DASHBOARD SECTIONS INSTANTLY
         dropZone.classList.add('hidden');
         controlsSection.classList.remove('hidden');
         document.getElementById('waveform-workspace').classList.remove('hidden');
 
+        // Reset system dashboard coordinates values
         speedSlider.value = 1.0;
         speedCustomInput.value = '1.00';
         seekMinInput.value = '00';
         seekSecInput.value = '00';
+        seekMsInput.value = '000';
         timelineScrubber.value = 0;
-        waveformZoomSlider.value = 0; // Reset tracking pointer position
+        waveformZoomSlider.value = 0; 
         currentSpeed = 1.0;
     }
 });
 
-// Real-Time Scaled Two-Way Core Synchronization Readout Display Data Pipeline
+// UPGRADED TWO-WAY REGION VALUE DISPLAY SYSTEM WITH FLOATING MILLISECOND RESOLUTION
 const updateTrimUIReadout = (start, end) => {
     const scaledStart = start / currentSpeed;
     const scaledEnd = end / currentSpeed;
     const scaledDuration = (end - start) / currentSpeed;
 
     const userIsCurrentlyTyping = [
-        trimStartMin,
-        trimStartSec,
-        trimEndMin,
-        trimEndSec
+        trimStartMin, trimStartSec, trimStartMs,
+        trimEndMin, trimEndSec, trimEndMs
     ].includes(document.activeElement);
 
     if (!userIsCurrentlyTyping) {
         trimStartMin.value = Math.floor(scaledStart / 60).toString().padStart(2, '0');
         trimStartSec.value = Math.floor(scaledStart % 60).toString().padStart(2, '0');
+        trimStartMs.value = Math.floor((scaledStart % 1) * 1000).toString().padStart(3, '0');
+
         trimEndMin.value = Math.floor(scaledEnd / 60).toString().padStart(2, '0');
         trimEndSec.value = Math.floor(scaledEnd % 60).toString().padStart(2, '0');
+        trimEndMs.value = Math.floor((scaledEnd % 1) * 1000).toString().padStart(3, '0');
     }
-
-    trimDurationTxt.textContent = `${scaledDuration.toFixed(1)}s`;
+    
+    trimDurationTxt.textContent = `${scaledDuration.toFixed(3)}s`;
 
     trimStartSlider.value = start;
     trimEndSlider.value = end;
@@ -155,16 +174,12 @@ wavesurfer.on('ready', function () {
 
     wavesurfer.setPlaybackRate(currentSpeed);
 
-    // CRITICAL FIX: DYNAMIC ZOOM CEILING CALCULATION
-    // Keeps total canvas width strictly under 30,000px to guarantee the browser never crashes/resets
+    // Enforce safety ceiling calculations for canvas boundaries
     const safeMaxZoomPxPerSec = Math.floor(30000 / duration);
-
-    waveformZoomSlider.min = "0";
-    waveformZoomSlider.max = Math.max(5, safeMaxZoomPxPerSec).toString();
+    waveformZoomSlider.max = Math.max(5, safeMaxZoomPxPerSec).toString(); 
     waveformZoomSlider.value = "0";
     wavesurfer.zoom(0);
 
-    // Sync sliders max bounds to exact file duration metric
     trimStartSlider.max = duration;
     trimEndSlider.max = duration;
 
@@ -189,7 +204,7 @@ wsRegions.on('region-updated', function (region) {
     if (region.id === 'trim-zone') {
         trimStart = region.start;
         trimEnd = region.end;
-
+        
         if (!isProgrammaticUpdate) {
             updateTrimUIReadout(trimStart, trimEnd);
         }
@@ -200,14 +215,13 @@ wsRegions.on('region-updated', function (region) {
 // ========================================================
 // CORE IMPLEMENTATION: HIGH-RESOLUTION ZOOM ENGAGEMENT
 // ========================================================
-waveformZoomSlider.addEventListener('input', function (event) {
-    const zoomPixelsPerSecond = Number(event.target.value);
-    wavesurfer.zoom(zoomPixelsPerSecond);
+waveformZoomSlider.addEventListener('input', function(event) {
+    wavesurfer.zoom(Number(event.target.value));
 });
 
 
 // ========================================================
-// CORE IMPLEMENTATION: MANUAL TYPING & SLIDER ENGINE
+// CORE IMPLEMENTATION: UPGRADED FLOATING-POINT INPUT ENGINE
 // ========================================================
 
 const applyUpperSliderTrimChanges = () => {
@@ -229,14 +243,20 @@ const executeManualTrimUpdate = () => {
 
     let startMin = parseInt(trimStartMin.value) || 0;
     let startSec = parseInt(trimStartSec.value) || 0;
+    let startMs = parseInt(trimStartMs.value) || 0;
     let endMin = parseInt(trimEndMin.value) || 0;
     let endSec = parseInt(trimEndSec.value) || 0;
+    let endMs = parseInt(trimEndMs.value) || 0;
 
+    // Enforce parameter boundaries limits loops guards
     if (startSec > 59) { startSec = 59; trimStartSec.value = '59'; }
+    if (startMs > 999) { startMs = 999; trimStartMs.value = '999'; }
     if (endSec > 59) { endSec = 59; trimEndSec.value = '59'; }
+    if (endMs > 999) { endMs = 999; trimEndMs.value = '999'; }
 
-    let scaledStart = (startMin * 60) + startSec;
-    let scaledEnd = (endMin * 60) + endSec;
+    // Merge integers into precise decimal coordinates seconds representations
+    let scaledStart = (startMin * 60) + startSec + (startMs / 1000);
+    let scaledEnd = (endMin * 60) + endSec + (endMs / 1000);
 
     let rawStart = scaledStart * currentSpeed;
     let rawEnd = scaledEnd * currentSpeed;
@@ -245,10 +265,10 @@ const executeManualTrimUpdate = () => {
     if (rawEnd > totalDuration) rawEnd = totalDuration;
 
     if (rawStart >= rawEnd) {
-        if (document.activeElement === trimStartMin || document.activeElement === trimStartSec) {
-            rawEnd = Math.min(totalDuration, rawStart + 2);
+        if ([trimStartMin, trimStartSec, trimStartMs].includes(document.activeElement)) {
+            rawEnd = Math.min(totalDuration, rawStart + 0.1); // 100ms offset cushion
         } else {
-            rawStart = Math.max(0, rawEnd - 2);
+            rawStart = Math.max(0, rawEnd - 0.1);
         }
     }
 
@@ -258,26 +278,32 @@ const executeManualTrimUpdate = () => {
     applyUpperSliderTrimChanges();
 };
 
+// Attach listeners to all six configuration entry coordinates
 trimStartMin.addEventListener('change', executeManualTrimUpdate);
 trimStartSec.addEventListener('change', executeManualTrimUpdate);
+trimStartMs.addEventListener('change', executeManualTrimUpdate);
 trimEndMin.addEventListener('change', executeManualTrimUpdate);
 trimEndSec.addEventListener('change', executeManualTrimUpdate);
+trimEndMs.addEventListener('change', executeManualTrimUpdate);
 
 const cleanTrimPaddingOnBlur = (event) => {
     const value = parseInt(event.target.value) || 0;
-    event.target.value = value.toString().padStart(2, '0');
+    if (event.target.classList.contains('ms-field')) {
+        event.target.value = value.toString().padStart(3, '0');
+    } else {
+        event.target.value = value.toString().padStart(2, '0');
+    }
 };
-trimStartMin.addEventListener('blur', cleanTrimPaddingOnBlur);
-trimStartSec.addEventListener('blur', cleanTrimPaddingOnBlur);
-trimEndMin.addEventListener('blur', cleanTrimPaddingOnBlur);
-trimEndSec.addEventListener('blur', cleanTrimPaddingOnBlur);
+[trimStartMin, trimStartSec, trimStartMs, trimEndMin, trimEndSec, trimEndMs].forEach(input => {
+    input.addEventListener('blur', cleanTrimPaddingOnBlur);
+});
 
 
 // Drag Handle 1: Moving the Selection START slider stick
-trimStartSlider.addEventListener('input', function (event) {
+trimStartSlider.addEventListener('input', function(event) {
     let value = parseFloat(event.target.value);
     if (value >= trimEnd) {
-        value = Math.max(0, trimEnd - 0.5);
+        value = Math.max(0, trimEnd - 0.01);
         trimStartSlider.value = value;
     }
     trimStart = value;
@@ -285,10 +311,10 @@ trimStartSlider.addEventListener('input', function (event) {
 });
 
 // Drag Handle 2: Moving the Selection END slider stick
-trimEndSlider.addEventListener('input', function (event) {
+trimEndSlider.addEventListener('input', function(event) {
     let value = parseFloat(event.target.value);
     if (value <= trimStart) {
-        value = Math.min(wavesurfer.getDuration(), trimStart + 0.5);
+        value = Math.min(wavesurfer.getDuration(), trimStart + 0.01);
         trimEndSlider.value = value;
     }
     trimEnd = value;
@@ -299,22 +325,22 @@ trimEndSlider.addEventListener('input', function (event) {
 // ========================================================
 // UPPER 5s FINE-TUNERS NUDGE LISTENERS
 // ========================================================
-btnTstartBack.addEventListener('click', function () {
+btnTstartBack.addEventListener('click', function() {
     trimStart = Math.max(0, trimStart - 5);
     applyUpperSliderTrimChanges();
 });
 
-btnTstartForward.addEventListener('click', function () {
-    trimStart = Math.min(trimEnd - 0.5, trimStart + 5);
+btnTstartForward.addEventListener('click', function() {
+    trimStart = Math.min(trimEnd - 0.1, trimStart + 5);
     applyUpperSliderTrimChanges();
 });
 
-btnTendBack.addEventListener('click', function () {
-    trimEnd = Math.max(trimStart + 0.5, trimEnd - 5);
+btnTendBack.addEventListener('click', function() {
+    trimEnd = Math.max(trimStart + 0.1, trimEnd - 5);
     applyUpperSliderTrimChanges();
 });
 
-btnTendForward.addEventListener('click', function () {
+btnTendForward.addEventListener('click', function() {
     const duration = wavesurfer.getDuration();
     trimEnd = Math.min(duration, trimEnd + 5);
     applyUpperSliderTrimChanges();
@@ -328,7 +354,7 @@ previewBtn.addEventListener('click', function () {
     isPreviewModeActive = true;
 });
 
-// Time tracker playback ticker
+// Time tracker playback ticker with high-res millisecond formatting mappings
 wavesurfer.on('timeupdate', function (currentTime) {
     const duration = wavesurfer.getDuration();
     const scaledTime = currentTime / currentSpeed;
@@ -340,11 +366,14 @@ wavesurfer.on('timeupdate', function (currentTime) {
         timelineScrubber.value = (currentTime / duration) * 100;
     }
 
-    if (document.activeElement !== seekMinInput && document.activeElement !== seekSecInput) {
+    const userIsSeeking = [seekMinInput, seekSecInput, seekMsInput].includes(document.activeElement);
+    if (!userIsSeeking) {
         const currentMins = Math.floor(scaledTime / 60);
         const currentSecs = Math.floor(scaledTime % 60);
+        const currentMs = Math.floor((scaledTime % 1) * 1000);
         seekMinInput.value = currentMins.toString().padStart(2, '0');
         seekSecInput.value = currentSecs.toString().padStart(2, '0');
+        seekMsInput.value = currentMs.toString().padStart(3, '0');
     }
 
     if (isPreviewModeActive && currentTime >= trimEnd) {
@@ -382,25 +411,30 @@ removeBtn.addEventListener('click', function () {
     console.log("Workspace layout tracking reset.");
 });
 
-// Manual Timecode Navigation Seeker Input Calculations
+// UPGRADED: Manual Timecode Navigation Seeker Input Calculations with milliseconds support
 const executeManualTimecodeSeek = () => {
     let inputMinutes = parseInt(seekMinInput.value) || 0;
     let inputSeconds = parseInt(seekSecInput.value) || 0;
+    let inputMs = parseInt(seekMsInput.value) || 0;
     const totalDuration = wavesurfer.getDuration();
     const maxScaledDuration = totalDuration / currentSpeed;
 
     if (inputSeconds > 59) { inputSeconds = 59; seekSecInput.value = '59'; }
+    if (inputMs > 999) { inputMs = 999; seekMsInput.value = '999'; }
     if (inputMinutes < 0) { inputMinutes = 0; seekMinInput.value = '00'; }
     if (inputSeconds < 0) { inputSeconds = 0; seekSecInput.value = '00'; }
+    if (inputMs < 0) { inputMs = 0; seekMsInput.value = '000'; }
 
-    let computedScaledSeconds = (inputMinutes * 60) + inputSeconds;
+    let computedScaledSeconds = (inputMinutes * 60) + inputSeconds + (inputMs / 1000);
 
     if (computedScaledSeconds > maxScaledDuration) {
         computedScaledSeconds = maxScaledDuration;
         const maxMins = Math.floor(maxScaledDuration / 60);
         const maxSecs = Math.floor(maxScaledDuration % 60);
+        const maxMs = Math.floor((maxScaledDuration % 1) * 1000);
         seekMinInput.value = maxMins.toString().padStart(2, '0');
         seekSecInput.value = maxSecs.toString().padStart(2, '0');
+        seekMsInput.value = maxMs.toString().padStart(3, '0');
     }
 
     let originalSecondsTarget = computedScaledSeconds * currentSpeed;
@@ -409,13 +443,11 @@ const executeManualTimecodeSeek = () => {
 
 seekMinInput.addEventListener('input', executeManualTimecodeSeek);
 seekSecInput.addEventListener('input', executeManualTimecodeSeek);
+seekMsInput.addEventListener('input', executeManualTimecodeSeek);
 
-const cleanPaddedViewOnBlur = (event) => {
-    const value = parseInt(event.target.value) || 0;
-    event.target.value = value.toString().padStart(2, '0');
-};
-seekMinInput.addEventListener('blur', cleanPaddedViewOnBlur);
-seekSecInput.addEventListener('blur', cleanPaddedViewOnBlur);
+[seekMinInput, seekSecInput, seekMsInput].forEach(input => {
+    input.addEventListener('blur', cleanTrimPaddingOnBlur);
+});
 
 // Core Audio Speed Modifier
 const applyEngineSpeed = (speedValue) => {
@@ -480,7 +512,7 @@ downloadBtn.addEventListener('click', async function () {
             fileSystemSaveHandle = await window.showSaveFilePicker(pickerOptions);
         } catch (pickerError) {
             console.log("User cancelled file location selection window:", pickerError);
-            return;
+            return; 
         }
     }
 

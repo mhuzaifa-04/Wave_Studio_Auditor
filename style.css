@@ -800,3 +800,32 @@ body {
     min-width: 135px; /* Broadened wrapper base layer */
     justify-content: center;
 }
+
+/* ==========================================
+   APPLICATION BRAND LOGO STYLES
+   ========================================== */
+.app-logo-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.app-profile-logo {
+    height: 64px;               /* Clean desktop operational profile height */
+    width: auto;                /* Prevents image squishing aspect ratios */
+    max-width: 220px;           /* Limits ultra-wide horizontal layout banners */
+    object-fit: contain;        /* Centers image content inside container bounding box */
+    border-radius: 12px;        /* Soft squircle rounding effect edges */
+    background-color: transparent;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Elegant micro-interaction bounce when hovering over the application logo branding */
+.app-profile-logo:hover {
+    transform: scale(1.05) rotate(1deg);
+}
+
+.app-header h1 {
+    margin-top: 5px;            /* Tightens gap between title and logo node link */
+}
